@@ -24,7 +24,7 @@ export default function NewConvention() {
     formation_titre: '', formation_objectifs: '', formation_programme: '',
     formation_modalites: 'présentiel', formation_lieu: '',
     date_debut: '', date_fin: '', duree_heures: '', nb_participants: '1',
-    prix_ht: '', tva_taux: '20', financement: 'opco', modalites_paiement: 'à réception de facture',
+    prix_ht: '', tva_taux: '0', financement: 'opco', modalites_paiement: 'à réception de facture',
   })
 
   useEffect(() => {
@@ -226,9 +226,11 @@ export default function NewConvention() {
           {step === 4 && (
             <div style={card}>
               <h3 style={{ fontSize:15, fontWeight:600, color:'#fff', marginBottom:14 }}>💰 Tarification</h3>
+              <div style={{ padding:12, background:'rgba(245,158,11,.05)', border:'1px solid rgba(245,158,11,.2)', borderRadius:9, marginBottom:14, fontSize:12, color:'#fcd34d' }}>
+                ℹ️ TVA non applicable, article 261-4-4 du CGI (exonération des organismes de formation)
+              </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-                <div><label style={labelStyle}>Prix HT (€) *</label><input type="number" value={form.prix_ht} onChange={e=>update('prix_ht',e.target.value)} placeholder="2000" style={inputStyle}/></div>
-                <div><label style={labelStyle}>Taux TVA (%)</label><input type="number" value={form.tva_taux} onChange={e=>update('tva_taux',e.target.value)} style={inputStyle}/></div>
+                <div><label style={labelStyle}>Prix (€) *</label><input type="number" value={form.prix_ht} onChange={e=>update('prix_ht',e.target.value)} placeholder="2000" style={inputStyle}/></div>
                 <div>
                   <label style={labelStyle}>Financement</label>
                   <select value={form.financement} onChange={e=>update('financement',e.target.value)} style={inputStyle}>
@@ -242,13 +244,9 @@ export default function NewConvention() {
                 <div><label style={labelStyle}>Modalités de paiement</label><input value={form.modalites_paiement} onChange={e=>update('modalites_paiement',e.target.value)} style={inputStyle}/></div>
               </div>
 
-              <div style={{ marginTop:16, padding:16, background:'rgba(14,165,233,.05)', border:'1px solid rgba(14,165,233,.2)', borderRadius:10 }}>
-                <div style={{ fontSize:12, color:'#0ea5e9', fontWeight:600, marginBottom:10 }}>💡 Calcul automatique</div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14, textAlign:'center' }}>
-                  <div><div style={{ fontSize:11, color:'#64748b' }}>Prix HT</div><div style={{ fontFamily:'Sora,Georgia', fontSize:20, fontWeight:700, color:'#fff', marginTop:2 }}>{prix_ht_num.toLocaleString('fr-FR')}€</div></div>
-                  <div><div style={{ fontSize:11, color:'#64748b' }}>TVA ({tva_taux_num}%)</div><div style={{ fontFamily:'Sora,Georgia', fontSize:20, fontWeight:700, color:'#f59e0b', marginTop:2 }}>{tva_montant.toLocaleString('fr-FR')}€</div></div>
-                  <div><div style={{ fontSize:11, color:'#64748b' }}>Prix TTC</div><div style={{ fontFamily:'Sora,Georgia', fontSize:20, fontWeight:700, color:'#10b981', marginTop:2 }}>{prix_ttc.toLocaleString('fr-FR')}€</div></div>
-                </div>
+              <div style={{ marginTop:16, padding:16, background:'rgba(16,185,129,.05)', border:'1px solid rgba(16,185,129,.2)', borderRadius:10, textAlign:'center' }}>
+                <div style={{ fontSize:12, color:'#64748b' }}>Total à facturer (net de taxes)</div>
+                <div style={{ fontFamily:'Sora,Georgia', fontSize:28, fontWeight:800, color:'#10b981', marginTop:4 }}>{prix_ht_num.toLocaleString('fr-FR')}€</div>
               </div>
             </div>
           )}
