@@ -50,12 +50,29 @@ export default function Layout({ children, ofNom }: LayoutProps) {
   const router = useRouter()
   const [nomOrganisme, setNomOrganisme] = useState(ofNom || 'ANZ Formation')
 
+  const [ticketsUnread, setTicketsUnread] = useState(0)
+
   useEffect(() => {
     if (ofNom) return
     fetch('/api/admin/config').then(r=>r.json()).then(d=>{
       if (d.config?.nom_organisme) setNomOrganisme(d.config.nom_organisme)
     }).catch(()=>{})
   }, [ofNom])
+
+  // Charger compteur tickets non-lus
+  useEffect(() => {
+    function loadUnread() {
+      if (typeof window === 'undefined') return
+      const email = localStorage.getItem('anzpilot_user') || localStorage.getItem('anzpilot_user_email') || ''
+      if (!email) return
+      fetch(`/api/notifications/count?type=of&email=${encodeURIComponent(email)}`).then(r=>r.json()).then(d=>{
+        setTicketsUnread(d.tickets_unread || 0)
+      }).catch(()=>{})
+    }
+    loadUnread()
+    const id = setInterval(loadUnread, 30000)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <div style={{ display:'flex', minHeight:'100vh', background:'#050c1a', color:'#e2e8f0', fontFamily:'DM Sans,system-ui' }}>
@@ -78,13 +95,18 @@ export default function Layout({ children, ofNom }: LayoutProps) {
               )}
               {section.items.map(item => {
                 const active = router.pathname === item.href || (item.href !== '/dashboard' && router.pathname.startsWith(item.href))
+                const showBadge = item.id === 'support' && ticketsUnread > 0
                 return (
-                  <Link key={item.id} href={item.href} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 10px', borderRadius:8, color: active?'#0ea5e9':'#94a3b8', background: active?'rgba(14,165,233,.1)':'transparent', textDecoration:'none', fontSize:13, fontWeight:500, marginBottom:2, transition:'all .15s' }}
+                  <Link key={item.id} href={item.href} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 10px', borderRadius:8, color: active?'#0ea5e9':'#94a3b8', background: active?'rgba(14,165,233,.1)':'transparent', textDecoration:'none', fontSize:13, fontWeight:500, marginBottom:2, transition:'all .15s', position:'relative' }}
                     onMouseEnter={e=>{if(!active){e.currentTarget.style.background='rgba(255,255,255,.04)'; e.currentTarget.style.color='#fff'}}}
                     onMouseLeave={e=>{if(!active){e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'}}}>
-                    <span style={{ fontSize:16, width:20, textAlign:'center', flexShrink:0 }}>{item.icon}</span>
+                    <span style={{ fontSize:16, width:20, textAlign:'center', flexShrink:0, position:'relative' }}>
+                      {item.icon}
+                      {collapsed && showBadge && <span style={{ position:'absolute', top:-4, right:-6, minWidth:14, height:14, borderRadius:7, background:'#ef4444', color:'#fff', fontSize:9, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', padding:'0 3px' }}>{ticketsUnread}</span>}
+                    </span>
                     {!collapsed && <span style={{ flex:1 }}>{item.label}</span>}
-                    {!collapsed && (item as any).badge && <span style={{ fontSize:9, fontWeight:700, padding:'2px 6px', borderRadius:10, background:'rgba(16,185,129,.15)', color:'#10b981' }}>{(item as any).badge}</span>}
+                    {!collapsed && showBadge && <span style={{ fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:10, background:'#ef4444', color:'#fff', minWidth:20, textAlign:'center' }}>{ticketsUnread}</span>}
+                    {!collapsed && !showBadge && (item as any).badge && <span style={{ fontSize:9, fontWeight:700, padding:'2px 6px', borderRadius:10, background:'rgba(16,185,129,.15)', color:'#10b981' }}>{(item as any).badge}</span>}
                   </Link>
                 )
               })}
@@ -110,3 +132,4 @@ export default function Layout({ children, ofNom }: LayoutProps) {
     </div>
   )
 }
+
